@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import burgerImg from "../../assets/burger.png";
 
-const Login = () => {
+const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isMerging, setIsMerging] = useState(false);
   const navigate = useNavigate();
@@ -55,7 +55,7 @@ const Login = () => {
         </motion.div>
 
 
-        {/* ================= MAIN AUTHENTICATION CARD ================= */}
+        {/* Signup Form */}
         <motion.form
           onSubmit={(e) => { e.preventDefault(); navigate("/"); }}
           className="relative z-10 w-full bg-[#161925]/85 backdrop-blur-2xl border border-white/10 backdrop-blur-2xl rounded-[28px] p-8 shadow-[0_32px_64px_rgba(0,0,0,0.6)] backdrop-blur-xl
@@ -65,7 +65,14 @@ const Login = () => {
           transition={{ duration: 0.3 }}
         >
           <h2 className="text-3xl font-extrabold text-white mb-2 text-center tracking-tight">🍔 InstantFoodie</h2>
-          <p className="text-gray-400 mb-8 text-center text-sm">Log in to continue ordering.</p>
+          <p className="text-gray-400 mb-8 text-center text-sm">Create your account to get started.</p>
+
+          <input
+            type="text"
+            required
+            placeholder="Full name"
+            className="w-full bg-[#202436] rounded-xl px-4 py-3.5 mb-4 text-white placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-300 transition-all border border-white/[0.03]"
+          />
 
           <input
             type="email"
@@ -74,7 +81,7 @@ const Login = () => {
             className="w-full bg-[#202436] rounded-xl px-4 py-3.5 mb-4 text-white placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-300 transition-all border border-white/[0.03]"
           />
 
-          <div className="relative mb-2">
+          <div className="relative mb-6">
             <input
               type={showPassword ? "text" : "password"}
               required
@@ -84,7 +91,7 @@ const Login = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold hover:text-[#FB923C]"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold hover:text-[#FB923C] "
             >
               {showPassword ? (
                 <FiEyeOff size={20} />
@@ -94,27 +101,21 @@ const Login = () => {
             </button>
           </div>
 
-          <div className="text-right mb-6">
-            <a href="/forgot-password" className="text-sm text-gray-400 hover:text-[#FB923C] transition-colors">
-              Forgot password?
-            </a>
-          </div>
-
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 text-white font-bold py-3.5 rounded-xl shadow-[0_6px_24px_rgba(249,115,22,0.35)] hover:scale-[1.02] hover:shadow-orange-500/40 active:scale-[0.98] transition-all "
+            className="w-full bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 text-white font-bold py-3.5 rounded-xl shadow-[0_6px_24px_rgba(249,115,22,0.35)] hover:scale-[1.02] hover:shadow-orange-500/40 active:scale-[0.98] transition-all"
           >
-            Log in
+            Create account
           </button>
 
           <p className="text-center text-gray-400 text-sm mt-8">
-            New to InstantFoodie?{" "}
+            Already have an account?{" "}
             <Link
-              to="/signup"
-              onClick={(e) => handleNavClick(e, "/signup")}
+              to="/login"
+              onClick={(e) => handleNavClick(e, "/login")}
               className="text-[#F97316] font-semibold hover:text-[#FB923C] transition-colors"
             >
-              Create an account
+              Log in
             </Link>
           </p>
         </motion.form>
@@ -123,4 +124,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;

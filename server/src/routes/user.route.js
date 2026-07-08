@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { getProfile, updateProfile } from "../controllers/user.controller.js";
-import {isLoggedIn} from "../middlewares/auth.isLoggedIn.js";
+
+// Fix the folder name here by adding the 's'
+import {isLoggedIn} from "../middlewares/auth.middleware.js"; 
+
 
 const router = Router();
 
