@@ -1,6 +1,6 @@
 import crypto from 'crypto'
-import Order from '../models/order';
-import foodItems from '../models/foodItem';
+import Order from '../models/order.js';
+import foodItems from '../models/foodItem.js';
 export const PlaceOrder = async (req, res) => {
     try {
         let { restaurantId, items, deliveryAddress } = req.body; // items return array consisting of objects returning foodItem id and quantity
@@ -19,17 +19,17 @@ export const PlaceOrder = async (req, res) => {
             })
         }
 
-        const orderId = `ORD-${crypto.randomBytes(4).toString('hex').toUpperCase}`
+        const orderId = `ORD-${crypto.randomBytes(4).toString('hex').toUpperCase()}`
 
         let orderItems = []
         
-        for(const item of items){
+        for(let item of items){
             let findItem = await foodItems.findById(item.foodItemId)
             if (!findItem) {
                 return res.status(404).json({
                     success: false,
                     message: "No food item found",
-                    order: placeOrder
+                    
                 })
             }
 
@@ -37,10 +37,9 @@ export const PlaceOrder = async (req, res) => {
                 return res.status(404).json({
                     success: false,
                     message: " Some items are out of stock",
-                    order: placeOrder
+                    
                 })
             }
-
 
             orderItems.push ({
                 foodItemId: item.foodItemId,
@@ -51,13 +50,13 @@ export const PlaceOrder = async (req, res) => {
             })
         }
 
-        let totalAmount = item.reduce((acc, ci) => acc + ci.subtotal, 0)
+        let totalAmount = orderItems.reduce((acc, ci) => acc + ci.subtotal, 0)
 
-        const placeOrder = await Order.create({
+        let placeOrder = await Order.create({
             orderId,
             userId: user._id,
             restaurantId,
-            items: item
+            items: orderItems
             ,
             totalAmount,
             deliveryAddress
