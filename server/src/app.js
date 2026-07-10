@@ -6,11 +6,9 @@ import cors from "cors";
 import restaurantRouter from "./routes/restaurant.route.js";
 import authRouter from "./routes/auth.route.js"; // make sure file name matches exactly
 import userRouter from "./routes/user.route.js";
-import cartRouter from "./routes/cart.route.js";
 import foodItemsRouter from "./routes/foodItem.route.js";
-import userRouter from "./routes/user.route.js"
-import foodItemsRouter from './routes/foodItem.route.js'
-import orderRouter from './routes/order.route.js'
+import cartRouter from "./routes/cart.route.js";
+import orderRouter from "./routes/order.route.js";
 
 
 const app = express();
@@ -32,6 +30,7 @@ app.use(
   }),
 );
 
+
 // ---------- Routes ----------
 
 app.use("/api/auth", authRouter);
@@ -42,14 +41,17 @@ app.use("/api/restaurants", restaurantRouter);
 
 app.use("/api/foodItems", foodItemsRouter);
 
+app.use("/api/cart", cartRouter);
 
-app.use('/api/order', orderRouter)
+app.use("/api/order", orderRouter);
 
 // // Restaurant routes -> list restaurants, food items, menu
 
 
 
-app.use("/api/cart", cartRouter);
+// // Cart routes -> add/remove/view cart items
+// import cartRouter from "./routes/cart.route.js"
+// app.use("/api/cart", cartRouter)
 
 // // Order routes -> place order, order history, order status, tracking
 // import orderRouter from "./routes/order.route.js"
