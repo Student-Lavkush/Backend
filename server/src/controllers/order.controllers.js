@@ -3,6 +3,7 @@ import Order from '../models/order.js';
 import foodItems from '../models/foodItem.js';
 import Restaurant from '../models/restaurant.js';
 import { get } from 'http';
+import { validTransition } from '../utils/orderStatusValidator.js';
 export const PlaceOrder = async (req, res) => {
     try {
         let { restaurantId, items, deliveryAddress } = req.body; // items return array consisting of objects returning foodItem id and quantity
@@ -163,23 +164,24 @@ export const updateOrderStatus = async (req, res) => {
         const order = await Order.findOne({ orderId })
 
         if (!order) {
-            return res.status(403).json({
+            return res.status(404).json({
                 success: false,
                 message: "No order of this id is avalible",
             })
         }
 
-        if (order.restaurantId.toString === restaurant._id) {
+        if (order.restaurantId.toString() !== restaurant._id.toString()) {
             return res.status(400).json({
                 success: false,
                 message: "Unauthorized access",
             })
         }
 
-        if (order.orderStatus === "Delivered") {
+        const validateTransitionStatus = validTransition(order.orderStatus, orderStatus)
+        if (!validateTransitionStatus) {
             return res.status(400).json({
                 success: false,
-                message: "Order is already Completed",
+                message: `Invalid order Status passed`,
             })
         }
 
@@ -191,7 +193,7 @@ export const updateOrderStatus = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            Status:updateStatus 
+            Order:updateStatus 
         });
 
     } catch (error) {
