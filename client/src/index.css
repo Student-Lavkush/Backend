@@ -42,6 +42,17 @@
   scrollbar-width: none;
 }
 
+/* At the bottom of your index.css */
+@keyframes glowPulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: 0.6; 
+    transform: scale(1.05); /* Slight scaling makes the pulse look deeper */
+  }
+}
 @layer utilities {
   @keyframes spin-streak {
     0% { transform: rotate(0deg); }
