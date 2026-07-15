@@ -49,7 +49,16 @@ const foodSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Restaurant',
         required: true
-    }
+    },
+    rating:{
+    type:Number,
+    default:4.5
+},
+
+deliveryTime:{
+    type:String,
+    default:"30-40 min"
+},
 }, {
     timestamps: true
 })

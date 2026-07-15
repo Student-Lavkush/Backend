@@ -6,14 +6,15 @@ const api = axios.create({
 });
 
 
-export async function register({ fullName, email, password }) {
+export async function register({ fullName, email, password, role }) {
 
   const { data } = await api.post(
     "/api/auth/register",
     {
       fullName,
       email,
-      password
+      password,
+      role,
     }
   );
 
@@ -27,7 +28,7 @@ export async function login({ email, password }) {
     "/api/auth/login",
     {
       email,
-      password
+      password,
     }
   );
 

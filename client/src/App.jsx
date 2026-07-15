@@ -10,17 +10,25 @@ import Order from "./pages/Order/Order";
 import Tracking from "./pages/Tracking/Tracking";
 import Favorites from "./pages/Favorites/Favorites";
 import Profile from "./pages/Profile/Profile";
+import RestaurantOrders from "./pages/RestaurantOrders/RestaurantOrders";
+
 
 function App() {
   return (
     <Routes>
+
       {/* Unprotected */}
+
       <Route path="/" element={<Login />} />
+
       <Route path="/login" element={<Login />} />
+
       <Route path="/signup" element={<Signup />} />
 
-      {/* Protected */}
-       <Route
+
+      {/* User Protected */}
+
+      <Route
         path="/home"
         element={
           <ProtectedRoute>
@@ -28,6 +36,8 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+
       <Route
         path="/cart"
         element={
@@ -36,6 +46,8 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+
       <Route
         path="/checkout"
         element={
@@ -44,6 +56,8 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+
       <Route
         path="/order"
         element={
@@ -52,14 +66,18 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+
       <Route
-        path="/tracking"
+        path="/tracking/:orderId"
         element={
           <ProtectedRoute>
             <Tracking />
           </ProtectedRoute>
         }
       />
+
+
       <Route
         path="/favorites"
         element={
@@ -68,6 +86,8 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+
       <Route
         path="/profile"
         element={
@@ -76,8 +96,23 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+
+      {/* Restaurant */}
+
+      <Route
+        path="/restaurant-orders"
+        element={
+          <ProtectedRoute allowedRoles={["restaurant"]}>
+            <RestaurantOrders />
+          </ProtectedRoute>
+        }
+      />
+
+
     </Routes>
   );
 }
+
 
 export default App;

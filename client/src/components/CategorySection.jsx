@@ -1,7 +1,4 @@
-// import { useState } from "react";
-// import { categories, dishes } from "../data/foodData";
-
-
+import { getPublicFoodItems } from "../services/food.service";
 import { useEffect, useState } from "react";
 import { getAllFoodItems } from "../services/food.service";
 import { HiStar, HiPlus, HiMinus, HiHeart, HiOutlineHeart } from "react-icons/hi2";

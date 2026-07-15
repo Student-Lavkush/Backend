@@ -52,6 +52,57 @@ export const createFoodItem = async (req, res) => {
     }
 }
 
+export const getAllFoodItems = async (req,res)=>{
+    try {
+
+        const FoodItems = await foodItems.find({
+            isAvailable:true
+        });
+
+        return res.status(200).json({
+            success:true,
+            FoodItems
+        });
+
+    } catch(error){
+
+        return res.status(500).json({
+            success:false,
+            message:error.message
+        });
+
+    }
+}
+
+export const getPublicFoodItems = async(req,res)=>{
+
+    try{
+
+        const FoodItems = await foodItems.find({
+            isAvailable:true
+        })
+        .populate(
+            "restaurantId",
+            "restaurantName"
+        );
+
+
+        return res.status(200).json({
+            success:true,
+            FoodItems
+        });
+
+
+    }catch(error){
+
+        return res.status(500).json({
+            success:false,
+            message:error.message
+        });
+
+    }
+
+}
 // export const getAllFoodItems = async (req, res) => {
 //     try {
 // const user = req.user;
@@ -85,35 +136,35 @@ export const createFoodItem = async (req, res) => {
 //     }
 // }
 
-export const getAllFoodItems = async (req, res) => {
-    try {
-        const user = req.user;
+// export const getAllFoodItems = async (req, res) => {
+//     try {
+//         const user = req.user;
 
-        if (user.role !== "restaurant") {
-            return res.status(403).json({
-                success: false,
-                message: "Access denied. Only restaurant accounts can perform this action."
-            });
-        }
+//         if (user.role !== "restaurant") {
+//             return res.status(403).json({
+//                 success: false,
+//                 message: "Access denied. Only restaurant accounts can perform this action."
+//             });
+//         }
 
-        const FoodItems = await foodItems.find({
-            isAvailable: true
-        });
+//         const FoodItems = await foodItems.find({
+//             isAvailable: true
+//         });
 
-        return res.status(200).json({
-            success: true,
-            FoodItems
-        });
+//         return res.status(200).json({
+//             success: true,
+//             FoodItems
+//         });
 
-    } catch (error) {
+//     } catch (error) {
 
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        });
+//         return res.status(500).json({
+//             success: false,
+//             message: error.message
+//         });
 
-    }
-}
+//     }
+// }
 
 export const updateFoodInfo = async (req, res) => {
     try {

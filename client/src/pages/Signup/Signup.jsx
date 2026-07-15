@@ -11,6 +11,7 @@ const Signup = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("user");
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { register, authLoading } = useAuth();
@@ -39,6 +40,7 @@ const Signup = () => {
       fullName,
       email,
       password,
+      role,
     });
 
     if (result.success) {
@@ -75,14 +77,14 @@ const Signup = () => {
           initial={{ top: "50%", left: "50%", x: "-50%", y: "-50%", rotate: 0, scale: 1.1 }}
           animate={isMerging
             ? { top: "50%", left: "50%", x: "-50%", y: "-50%", rotate: 0, scale: 1.1 }
-            : { 
-                top: isMobile ? "-25%" : "-40%", 
-                left: isMobile ? "-10%" : "-30%", 
-                x: "0%", 
-                y: "0%", 
-                rotate: -18, 
-                scale: 1.15 
-              }
+            : {
+              top: isMobile ? "-25%" : "-40%",
+              left: isMobile ? "-10%" : "-30%",
+              x: "0%",
+              y: "0%",
+              rotate: -18,
+              scale: 1.15
+            }
           }
           transition={{ type: "spring", stiffness: 80, damping: 14 }}
           whileHover={{ scale: 1.05, rotate: -15 }}
@@ -97,13 +99,13 @@ const Signup = () => {
           initial={{ top: "50%", left: "50%", x: "-50%", y: "-50%", rotate: 0, scale: 1.1 }}
           animate={isMerging ?
             { top: "50%", left: "50%", x: "-50%", y: "-50%", rotate: 0, scale: 1.1 } :
-            { 
-              top: isMobile ? "65%" : "45%", 
-              left: isMobile ? "40%" : "52%", 
-              x: "-20%", 
-              y: "5%", 
-              rotate: -12, 
-              scale: 1.15 
+            {
+              top: isMobile ? "65%" : "45%",
+              left: isMobile ? "40%" : "52%",
+              x: "-20%",
+              y: "5%",
+              rotate: -12,
+              scale: 1.15
             }
           }
           transition={{ type: "spring", stiffness: 80, damping: 14, delay: 0.02 }}
@@ -154,6 +156,20 @@ const Signup = () => {
               placeholder="Password"
               className="w-full bg-neutral-950/40 rounded-xl px-4 py-3 sm:py-3.5 pr-14 text-white placeholder:text-neutral-600 outline-none border border-neutral-800/80 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all duration-200 text-sm sm:text-base"
             />
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full bg-neutral-950/40 rounded-xl px-4 py-3 mb-4 text-white border border-neutral-800 outline-none focus:border-amber-500"
+            >
+              <option value="user">
+                Customer
+              </option>
+
+              <option value="restaurant">
+                Restaurant
+              </option>
+
+            </select>
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}

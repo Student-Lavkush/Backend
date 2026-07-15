@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { HiCheckCircle, HiOutlineClock, HiOutlineXCircle, HiArrowPath, HiOutlineShoppingBag } from "react-icons/hi2";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
@@ -28,7 +29,7 @@ const filterTabs = [
 const activeStatuses = ["Placed", "Preparing", "Out for Delivery"];
 
 const Order = () => {
-
+const navigate = useNavigate();
   const { cartCount, reorderItems } = useCart();
 
   const [orders, setOrders] = useState([]);
@@ -340,6 +341,13 @@ const Order = () => {
                       ₹{order.totalAmount}
                     </span>
                   </div>
+
+                  <button
+  onClick={() => navigate(`/tracking/${order.orderId}`)}
+  className="mb-5 w-full flex items-center justify-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500 py-3 text-neutral-950 font-bold text-sm hover:bg-amber-400 transition-all duration-300 active:scale-95"
+>
+  Track Order
+</button>
 
                   {/* Reorder button */}
                   <button

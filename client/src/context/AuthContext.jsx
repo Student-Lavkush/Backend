@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
   }
 
 
-  async function register({ fullName, email, password }) {
+  async function register({ fullName, email, password, role }) {
 
     setAuthLoading(true);
 
@@ -37,30 +37,31 @@ export function AuthProvider({ children }) {
         fullName,
         email,
         password,
+        role,
       });
 
       setUser(data.user);
 
       return {
         success: true,
+        user: data.user,
       };
 
     } catch (error) {
 
       return {
-        success: false,
-        error: error?.response?.data?.message || "Signup failed",
+        success:false,
+        error:error?.response?.data?.message || "Signup failed"
       };
 
     } finally {
-
       setAuthLoading(false);
-
     }
   }
 
 
-  async function login({ email, password }) {
+
+  async function login({ email, password ,role}) {
 
     setAuthLoading(true);
 
@@ -69,30 +70,34 @@ export function AuthProvider({ children }) {
       const data = await authService.login({
         email,
         password,
+        role,
       });
+
 
       setUser(data.user);
 
+
       return {
-        success: true,
+        success:true,
+        user:data.user
       };
 
-    } catch (error) {
+
+    } catch(error){
 
       return {
-        success: false,
-        error: error?.response?.data?.message || "Login failed",
+        success:false,
+        error:error?.response?.data?.message || "Login failed"
       };
 
     } finally {
-
       setAuthLoading(false);
-
     }
   }
 
 
-  async function logout() {
+
+  async function logout(){
 
     await authService.logout();
     setUser(null);
@@ -100,22 +105,29 @@ export function AuthProvider({ children }) {
   }
 
 
-  function updateUser(partialUser) {
-    setUser((prev) => ({ ...prev, ...partialUser }));
+
+  function updateUser(partialUser){
+
+    setUser(prev => ({
+      ...prev,
+      ...partialUser
+    }));
+
   }
+
 
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        isAuthenticated:!!user,
         loading,
         authLoading,
         register,
         login,
         logout,
-        updateUser,
+        updateUser
       }}
     >
       {children}
@@ -125,11 +137,12 @@ export function AuthProvider({ children }) {
 }
 
 
-export function useAuth() {
+
+export function useAuth(){
 
   const context = useContext(AuthContext);
 
-  if (!context) {
+  if(!context){
     throw new Error("useAuth must be used inside AuthProvider");
   }
 
