@@ -1,6 +1,6 @@
 import express from "express";
-import { adminLogin,adminRegister, adminLogout , getUserById ,} from "../controllers/admin.controllers.js";
-import { authMiddleware } from "../middlewares/auth.middleware.js";
+import { adminLogin,adminRegister, adminLogout , getUserById ,getUsers , getRestaurants} from "../controllers/admin.controllers.js";
+import  authMiddleware  from "../middlewares/auth.middleware.js";
 const router = express.Router();
 
 // Admin Registration Route 
