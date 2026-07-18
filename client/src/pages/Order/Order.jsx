@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { HiCheckCircle, HiOutlineClock, HiOutlineXCircle, HiArrowPath, HiOutlineShoppingBag } from "react-icons/hi2";
+import { HiCheckCircle, HiOutlineClock, HiOutlineXCircle, HiArrowPath } from "react-icons/hi2";
 import Navbar from "../../components/Navbar";
 import { useCart } from "../../context/CartContext";
 import { getMyOrders, cancelOrder } from "../../services/order.service";
@@ -12,8 +12,6 @@ const steps = [
   { key: "Delivered", label: "Delivered" },
 ];
 
-// Cancel-by-customer is intentionally not wired up yet — backend's
-// updateOrderStatus only allows role === "restaurant" to change status.
 const cancellableStatuses = [
   "Placed",
   "Preparing",
@@ -29,8 +27,8 @@ const filterTabs = [
 const activeStatuses = ["Placed", "Preparing", "Out for Delivery"];
 
 const Order = () => {
-const navigate = useNavigate();
-  const { cartCount, reorderItems } = useCart();
+  const navigate = useNavigate();
+  const { cartCount } = useCart();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,8 +36,6 @@ const navigate = useNavigate();
   const [confirmingId, setConfirmingId] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all");
-  const [reorderingId, setReorderingId] = useState(null);
-  const [reorderMsg, setReorderMsg] = useState("");
 
 
   useEffect(() => {
@@ -72,24 +68,6 @@ const navigate = useNavigate();
     } finally {
       setCancellingId(null);
       setConfirmingId(null);
-    }
-  }
-
-
-  async function handleReorder(order) {
-    setReorderingId(order.orderId);
-    setReorderMsg("");
-
-    const result = await reorderItems(order.items);
-
-    setReorderingId(null);
-
-    if (result.success) {
-      setReorderMsg(`Items from Order #${order.orderId} added to your cart.`);
-      setTimeout(() => setReorderMsg(""), 4000);
-    } else {
-      setReorderMsg("Couldn't reorder those items. Please try again.");
-      setTimeout(() => setReorderMsg(""), 4000);
     }
   }
 
@@ -129,13 +107,6 @@ const navigate = useNavigate();
             </button>
           )}
         </div>
-
-        {/* Reorder toast */}
-        {reorderMsg && (
-          <div className="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-3 text-amber-400 text-sm font-semibold text-center">
-            {reorderMsg}
-          </div>
-        )}
 
         {/* Status filter tabs */}
         {!loading && !fetchError && orders.length > 0 && (
@@ -343,24 +314,13 @@ const navigate = useNavigate();
                   </div>
 
                   <button
-  onClick={() => navigate(`/tracking/${order.orderId}`)}
-  className="mb-5 w-full flex items-center justify-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500 py-3 text-neutral-950 font-bold text-sm hover:bg-amber-400 transition-all duration-300 active:scale-95"
->
-  Track Order
-</button>
-
-                  {/* Reorder button */}
-                  <button
-                    onClick={() => handleReorder(order)}
-                    disabled={reorderingId === order.orderId}
-                    className="mt-5 w-full flex items-center justify-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/5 py-3 text-amber-500 font-bold text-sm hover:bg-amber-500 hover:text-neutral-950 transition-all duration-300 active:scale-95 disabled:opacity-50"
+                    onClick={() => navigate(`/tracking/${order.orderId}`)}
+                    className="mt-5 mb-5 w-full flex items-center justify-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500 py-3 text-neutral-950 font-bold text-sm hover:bg-amber-400 transition-all duration-300 active:scale-95"
                   >
-                    <HiOutlineShoppingBag size={18} />
-                    {reorderingId === order.orderId ? "Adding to cart..." : "Reorder"}
+                    Track Order
                   </button>
 
-                  {/* Cancel Order — disabled until backend allows customers
-                      (not just restaurants) to transition their own order to "Cancelled".
+                  {/* Cancel Order — only while Placed or Preparing */}
                   {cancellableStatuses.includes(order.orderStatus) && (
                     confirmingId === order.orderId ? (
                       <div className="mt-5 flex flex-col sm:flex-row items-center gap-3 bg-red-500/5 border border-red-500/20 rounded-2xl px-5 py-4">
@@ -392,7 +352,7 @@ const navigate = useNavigate();
                         Cancel Order
                       </button>
                     )
-                  )} */}
+                  )}
                 </div>
               </div>
             );

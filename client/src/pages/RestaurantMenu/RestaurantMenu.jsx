@@ -42,7 +42,7 @@ function RestaurantMenu() {
   async function loadItems() {
     try {
       const data = await getMyFoodItems();
-      setItems(data.foodItems || data.data || []);
+      setItems(data.FoodItems || []);
     } catch (err) {
       console.log("Load food items error:", err);
     } finally {

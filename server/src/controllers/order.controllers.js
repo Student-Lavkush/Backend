@@ -32,11 +32,7 @@ export const PlaceOrder = async (req, res) => {
 
         for (let item of items) {
 
-            console.log("Received food id:", item.foodItemId);
-
             let findItem = await foodItems.findById(item.foodItemId);
-
-            console.log("Found food:", findItem);
 
             if (!findItem) {
                 return res.status(404).json({
@@ -61,7 +57,6 @@ export const PlaceOrder = async (req, res) => {
             });
         }
         let totalAmount = orderItems.reduce((acc, ci) => acc + ci.subtotal, 0)
-        console.log("Placing order with restaurantId:", restaurantId);
         let placeOrder = await Order.create({
             orderId,
             userId: user._id,
@@ -218,162 +213,119 @@ export const trackOrder = async (req, res) => {
     }
 };
 
-// export const updateOrderStatus = async (req, res) => {
-//     try {
 
-//         console.log("UPDATE ORDER BODY:", req.body);
-//         console.log("UPDATE ORDER PARAMS:", req.params);
-//         const { orderId } = req.params; // pass the generated order id like ORD-7898G3
-//         const { orderStatus } = req.body
-
-//         if (!orderId) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Need to send order id first",
-//             })
-//         }
-
-
-//         if (!orderStatus) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Need to send status",
-//             })
-//         }
-
-//         const user = req.user
-//         if (user.role !== 'restaurant') {
-//             return res.status(403).json({
-//                 success: false,
-//                 message: "only restaurants can update there order details",
-//             })
-//         }
-
-//         const restaurant = await Restaurant.findOne({ owner: user._id })
-//        const restaurantIds = myRestaurants.map(r => r._id.toString());
-
-// if (!restaurantIds.includes(order.restaurantId.toString())) {
-//     return res.status(400).json({
-//         success: false,
-//         message: "Unauthorized access",
-//     });
-// }
-//         const order = await Order.findOne({ orderId })
-
-//         if (!order) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "No order of this id is avalible",
-//             })
-//         }
-
-//         if (order.restaurantId.toString() !== restaurant._id.toString()) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: "Unauthorized access",
-//             })
-//         }
-
-//         const validateTransitionStatus = validTransition(order.orderStatus, orderStatus)
-//         if (!validateTransitionStatus) {
-//             return res.status(400).json({
-//                 success: false,
-//                 message: `Invalid order Status passed`,
-//             })
-//         }
-
-//         const updateStatus = await Order.findByIdAndUpdate(
-//             order._id,
-//             { orderStatus },
-//             { new: true, runValidators: true }
-//         )
-
-//         return res.status(200).json({
-//             success: true,
-//             Order: updateStatus
-//         });
-
-//     } catch (error) {
-//         return res
-//             .status(500)
-//             .json({
-//                 error: error.message,
-//                 success: false,
-//             });
-//     }
-// }
 export const updateOrderStatus = async (req, res) => {
     try {
-
-        console.log("UPDATE ORDER BODY:", req.body);
-        console.log("UPDATE ORDER PARAMS:", req.params);
-        const { orderId } = req.params; // pass the generated order id like ORD-7898G3
-        const { orderStatus } = req.body
+        const { orderId } = req.params;
+        const { orderStatus } = req.body;
 
         if (!orderId) {
             return res.status(400).json({
                 success: false,
                 message: "Need to send order id first",
-            })
+            });
         }
 
         if (!orderStatus) {
             return res.status(400).json({
                 success: false,
                 message: "Need to send status",
-            })
+            });
         }
 
-        const user = req.user
-        if (user.role !== 'restaurant') {
-            return res.status(403).json({
-                success: false,
-                message: "only restaurants can update there order details",
-            })
-        }
+        const user = req.user;
 
-        const myRestaurants = await Restaurant.find({ owner: user._id })
-        if (!myRestaurants || myRestaurants.length === 0) {
-            return res.status(403).json({
-                success: false,
-                message: "Restuarant not found"
-            })
-        }
-        const restaurantIds = myRestaurants.map(r => r._id.toString())
-
-        const order = await Order.findOne({ orderId })
-
+        const order = await Order.findOne({ orderId });
         if (!order) {
             return res.status(404).json({
                 success: false,
-                message: "No order of this id is avalible",
-            })
+                message: "No order of this id is available",
+            });
         }
 
-        if (!restaurantIds.includes(order.restaurantId.toString())) {
-            return res.status(400).json({
-                success: false,
-                message: "Unauthorized access",
-            })
+        // ---- CASE 1: restaurant updating order status (existing behaviour) ----
+        if (user.role === 'restaurant') {
+
+            const myRestaurants = await Restaurant.find({ owner: user._id });
+            if (!myRestaurants || myRestaurants.length === 0) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Restaurant not found"
+                });
+            }
+            const restaurantIds = myRestaurants.map(r => r._id.toString());
+
+            if (!restaurantIds.includes(order.restaurantId.toString())) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Unauthorized access",
+                });
+            }
+
+            const validateTransitionStatus = validTransition(order.orderStatus, orderStatus);
+            if (!validateTransitionStatus) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid order Status passed`,
+                });
+            }
+
+            const updateStatus = await Order.findByIdAndUpdate(
+                order._id,
+                { orderStatus },
+                { new: true, runValidators: true }
+            );
+
+            return res.status(200).json({
+                success: true,
+                Order: updateStatus
+            });
         }
 
-        const validateTransitionStatus = validTransition(order.orderStatus, orderStatus)
-        if (!validateTransitionStatus) {
-            return res.status(400).json({
-                success: false,
-                message: `Invalid order Status passed`,
-            })
+        // ---- CASE 2: user cancelling their own order ----
+        if (user.role === 'user') {
+
+            // users are only ever allowed to cancel, nothing else
+            if (orderStatus !== 'Cancelled') {
+                return res.status(403).json({
+                    success: false,
+                    message: "You can only cancel your order",
+                });
+            }
+
+            // must be their own order
+            if (order.userId.toString() !== user._id.toString()) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Unauthorized access",
+                });
+            }
+
+            // only allowed while Placed or Preparing
+            const cancellableStatuses = ["Placed", "Preparing"];
+            if (!cancellableStatuses.includes(order.orderStatus)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Order can no longer be cancelled",
+                });
+            }
+
+            const updateStatus = await Order.findByIdAndUpdate(
+                order._id,
+                { orderStatus: 'Cancelled' },
+                { new: true, runValidators: true }
+            );
+
+            return res.status(200).json({
+                success: true,
+                Order: updateStatus
+            });
         }
 
-        const updateStatus = await Order.findByIdAndUpdate(
-            order._id,
-            { orderStatus },
-            { new: true, runValidators: true }
-        )
-
-        return res.status(200).json({
-            success: true,
-            Order: updateStatus
+        // any other role
+        return res.status(403).json({
+            success: false,
+            message: "Not authorized to update order status",
         });
 
     } catch (error) {
