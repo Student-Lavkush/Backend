@@ -61,13 +61,13 @@ export const createFoodItem = async (req, res) => {
     }
 
     // Look up the restaurant owned by this logged-in user
-    const restaurant = await Restaurant.findOne({ owner: req.user._id });
-    if (!restaurant) {
-      return res.status(404).json({
-        success: false,
-        message: "Please create your restaurant profile first",
-      });
-    }
+   const restaurantDoc = await restaurant.findOne({ owner: req.user._id });
+if (!restaurantDoc) {
+  return res.status(404).json({
+    success: false,
+    message: "Please create your restaurant profile first",
+  });
+}
 
     const { name, description, price, imageUrl, isVeg, category, preparationTime } = req.body;
 
@@ -79,7 +79,7 @@ export const createFoodItem = async (req, res) => {
       isVeg,
       category,
       preparationTime,
-      restaurantId: restaurant._id, // <-- auto-attached, never trusted from body
+      restaurantId: restaurantDoc._id, // <-- auto-attached, never trusted from body
     });
 
     return res.status(201).json({
@@ -329,13 +329,13 @@ export const deleteFoodItem = async (req, res) => {
             });
         }
 
-        const restaurant = await restaurant.findOne({ owner: req.user._id }) //from authmiddleware take the user id to find teh restraurant
-        if (!restaurant) {
-            return res.status(404).json({
-                success: false,
-                message: "Restaurant not found"
-            })
-        }
+        const restaurantDoc = await restaurant.findOne({ owner: req.user._id })
+if (!restaurantDoc) {
+  return res.status(404).json({
+    success: false,
+    message: "Restaurant not found"
+  })
+}
         
         const fooditem = await foodItems.findById(id)
         if (!fooditem) {
@@ -345,7 +345,7 @@ export const deleteFoodItem = async (req, res) => {
             });
         }
 
-        if (restaurant._id.toString() !== fooditem.restaurantId.toString()) {
+       if (restaurantDoc._id.toString() !== fooditem.restaurantId.toString()) {
             return res.status(403).json({
                 success: false,
                 message: "You are not authorized to delete this food item."

@@ -149,7 +149,6 @@ export const getRestaurantOrders = async (req, res) => {
 
         // FIX: get ALL restaurants owned by this user, not just one
         const myRestaurants = await Restaurant.find({ owner: user._id });
-        console.log("Restaurant IDs owned by this user:", myRestaurants.map(r => r._id.toString()));
         if (!myRestaurants || myRestaurants.length === 0) {
             return res.status(404).json({
                 success: false,

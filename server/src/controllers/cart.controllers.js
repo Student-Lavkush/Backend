@@ -104,13 +104,7 @@ export const updateCartItem = async (req, res) => {
       });
     }
 
-    console.log("Cart ID:", cartId);
-    console.log("Logged in User:", req.user._id);
-
-    // Check if cart exists
     const existingCart = await Cart.findById(cartId);
-
-    console.log("Existing Cart:", existingCart);
 
     if (!existingCart) {
       return res.status(404).json({

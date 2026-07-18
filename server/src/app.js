@@ -48,16 +48,5 @@ app.use("/api/order", orderRouter);
 
 app.use("/api/admin", adminRouter);
 
-// // Restaurant routes -> list restaurants, food items, menu
-
-
-
-// // Cart routes -> add/remove/view cart items
-// import cartRouter from "./routes/cart.route.js"
-// app.use("/api/cart", cartRouter)
-
-// // Order routes -> place order, order history, order status, tracking
-// import orderRouter from "./routes/order.route.js"
-// app.use("/api/orders", orderRouter)
 
 export default app;
