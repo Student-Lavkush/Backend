@@ -1,24 +1,46 @@
 import express from "express";
-import { adminLogin,adminRegister, adminLogout , getUserById ,getUsers , getRestaurants} from "../controllers/admin.controllers.js";
-import  authMiddleware  from "../middlewares/auth.middleware.js";
+import {
+    adminLogin,
+    adminLogout,
+    getAllUsers,
+    getAllRestaurants,
+    getUserById,
+    deleteUser,
+    updateRestaurantStatus,
+    getAllOrders,
+    deleteRestaurant,
+    deleteFoodItem,
+} from "../controllers/admin.controllers.js";
+
+import authMiddleware from "../middlewares/auth.middleware.js";
+import authorizeRole from "../middlewares/role.middleware.js";
+
 const router = express.Router();
 
-// Admin Registration Route 
-router.post("/register", adminRegister);
-
-// Login existing admin
+// Public Route
 router.post("/login", adminLogin);
 
-// Logout admin
+// Protected Routes
+router.use(authMiddleware);
+router.use(authorizeRole("admin"));
+
+// Logout
 router.post("/logout", adminLogout);
 
-// Get all users 
-router.get('/users',authMiddleware,getUsers);
+// Users
+router.get("/users", getAllUsers);
+router.get("/users/:id", getUserById);
+router.delete("/users/:id", deleteUser);
 
-// Get all restaurants
-router.get('/restaurants', authMiddleware, getRestaurants);
+// Restaurants
+router.get("/restaurants", getAllRestaurants);
+router.patch("/restaurants/:id/status", updateRestaurantStatus);
+router.delete("/restaurants/:id", deleteRestaurant);
 
-//View a specific user by ID
-router.get('/users/:id', authMiddleware, getUserById);
+// Food Items
+router.delete("/food-item/:id", deleteFoodItem);
+
+// Orders
+router.get("/orders", getAllOrders);
 
 export default router;

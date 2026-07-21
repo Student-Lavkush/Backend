@@ -1,22 +1,34 @@
-import { Router } from "express"
-import { userLogin, userLogout, userRegister ,restaurantLogin} from "../controllers/auth.controllers.js"
+import { Router } from "express";
+import {
+    userRegister,
+    userLogin,
+    userLogout,
+    restaurantRegister,
+    restaurantLogin,
+} from "../controllers/auth.controllers.js";
 
+const router = Router();
 
-const router = Router()
+// ================= USER =================
 
-// Register a new user or restaurant owner
-router.post("/register", userRegister)
+// Register User
+router.post("/register", userRegister);
 
-// Login existing user
-router.post("/login", userLogin)
+// Login User
+router.post("/login", userLogin);
 
-// Logout user
-router.post("/logout",userLogout)
+// Logout User
+router.post("/logout", userLogout);
 
-// Restaurant Login
-router.post("/restaurant/login", restaurantLogin)
+// ================= RESTAURANT =================
 
-//different route for logout . function for logout of restaurant and owner are same as it clears the cookie and does not depend on the role.
-router.post("/restaurant/logout", userLogout)
+// Register Restaurant Owner
+router.post("/restaurant/register", restaurantRegister);
 
-export default router
+// Login Restaurant Owner
+router.post("/restaurant/login", restaurantLogin);
+
+// Logout Restaurant Owner
+router.post("/restaurant/logout", userLogout);
+
+export default router;
