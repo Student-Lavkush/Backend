@@ -9,10 +9,13 @@ import {
 } from "react-icons/hi2";
 import {
   getUsers,
+  deleteUser,
   getRestaurants,
+  deleteRestaurant,
+  deleteFoodItemAdmin,
+  getAllFoodsAdmin,
   getAllOrders,
 } from "../../services/admin.service";
-import { getPublicFoodItems , deleteFoodItem} from "../../services/food.service";
 
 const tabs = [
   { key: "users", label: "Users", icon: <HiOutlineUsers size={18} /> },
@@ -69,8 +72,8 @@ const AdminDashboard = () => {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${activeTab === tab.key
-                  ? "bg-amber-500 text-neutral-950"
-                  : "text-neutral-400 hover:text-white hover:bg-zinc-900"
+                ? "bg-amber-500 text-neutral-950"
+                : "text-neutral-400 hover:text-white hover:bg-zinc-900"
                 }`}
             >
               {tab.icon}
@@ -92,6 +95,20 @@ const AdminDashboard = () => {
 const UsersTab = () => {
   const [status, setStatus] = useState("loading");
   const [users, setUsers] = useState([]);
+  const [deletingId, setDeletingId] = useState(null);
+
+  async function handleDeleteUser(id) {
+    if (!window.confirm("Delete this user account? This cannot be undone.")) return;
+    setDeletingId(id);
+    try {
+      await deleteUser(id);
+      setUsers((prev) => prev.filter((u) => u._id !== id));
+    } catch (err) {
+      console.log("Delete user error:", err);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -146,12 +163,13 @@ const UsersTab = () => {
             <th className="py-3 pr-4 font-semibold">Email</th>
             <th className="py-3 pr-4 font-semibold">Phone</th>
             <th className="py-3 pr-4 font-semibold">Joined</th>
+            <th className="py-3 pr-4 font-semibold">Action</th>
           </tr>
         </thead>
         <tbody>
           {users.length === 0 ? (
             <tr>
-              <td colSpan={4} className="py-6 text-neutral-500 text-center">
+              <td colSpan={5} className="py-6 text-neutral-500 text-center">
                 No customer accounts found.
               </td>
             </tr>
@@ -165,6 +183,15 @@ const UsersTab = () => {
                 <td className="py-3 pr-4 text-neutral-500">{u.phone || "—"}</td>
                 <td className="py-3 pr-4 text-neutral-500">
                   {new Date(u.createdAt).toLocaleDateString("en-IN")}
+                </td>
+                <td className="py-3 pr-4">
+                  <button
+                    disabled={deletingId === u._id}
+                    onClick={() => handleDeleteUser(u._id)}
+                    className="text-xs font-bold text-red-400 border border-red-500/30 rounded-lg px-3 py-1.5 hover:bg-red-500/10 disabled:opacity-50"
+                  >
+                    {deletingId === u._id ? "Deleting..." : "Delete"}
+                  </button>
                 </td>
               </tr>
             ))
@@ -180,20 +207,41 @@ const RestaurantsTab = () => {
   const [loading, setLoading] = useState(true);
   const [restaurants, setRestaurants] = useState([]);
   const [error, setError] = useState("");
+  const [busyId, setBusyId] = useState(null);
 
   useEffect(() => {
+    loadRestaurants();
+  }, []);
+
+  function loadRestaurants() {
+    setLoading(true);
     getRestaurants()
       .then((data) => setRestaurants(data.restaurants || []))
       .catch(() => setError("Failed to load restaurants."))
       .finally(() => setLoading(false));
-  }, []);
+  }
+
+
+  async function handleDeleteRestaurant(id) {
+    if (
+      !window.confirm(
+        "Delete this restaurant? This will also delete all of its food items. This cannot be undone."
+      )
+    )
+      return;
+    setBusyId(id);
+    try {
+      await deleteRestaurant(id);
+      setRestaurants((prev) => prev.filter((r) => r._id !== id));
+    } catch (err) {
+      console.log("Delete restaurant error:", err);
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   return (
     <div>
-      <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-3 mb-5 text-amber-300 text-xs">
-        Showing restaurant owner accounts — Restaurant model has no status field
-        yet, so approve/suspend is disabled below.
-      </div>
 
       {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
@@ -209,12 +257,13 @@ const RestaurantsTab = () => {
                 <th className="py-3 pr-4 font-semibold">Email</th>
                 <th className="py-3 pr-4 font-semibold">Joined</th>
                 <th className="py-3 pr-4 font-semibold">Status</th>
+                <th className="py-3 pr-4 font-semibold">Action</th>
               </tr>
             </thead>
             <tbody>
               {restaurants.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-6 text-neutral-500 text-center">
+                  <td colSpan={6} className="py-6 text-neutral-500 text-center">
                     No restaurant accounts found.
                   </td>
                 </tr>
@@ -232,21 +281,24 @@ const RestaurantsTab = () => {
                       {new Date(r.createdAt).toLocaleDateString("en-IN")}
                     </td>
                     <td className="py-3 pr-4">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => updateRestaurantStatus(r._id)}
-                          className="text-xs font-bold text-amber-400 border border-amber-500 rounded-lg px-3 py-1.5"
-                        >
-                          {r.isOpen ? "Close" : "Open"}
-                        </button>
-                        <button
-                          disabled
-                          title="No admin delete/disable route exists on the backend yet"
-                          className="text-xs font-bold text-neutral-600 border border-neutral-800 rounded-lg px-3 py-1.5 cursor-not-allowed"
-                        >
-                          Disable
-                        </button>
-                      </div>
+                      <span
+                        className={`text-xs font-bold px-3 py-1 rounded-full ${
+                          r.isOpen
+                            ? "bg-green-500/10 text-green-400"
+                            : "bg-red-500/10 text-red-400"
+                        }`}
+                      >
+                        {r.isOpen ? "Open" : "Closed"}
+                      </span>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <button
+                        disabled={busyId === r._id}
+                        onClick={() => handleDeleteRestaurant(r._id)}
+                        className="text-xs font-bold text-red-400 border border-red-500/30 rounded-lg px-3 py-1.5 hover:bg-red-500/10 disabled:opacity-50"
+                      >
+                        {busyId === r._id ? "..." : "Delete"}
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -328,18 +380,13 @@ const OrdersTab = () => {
 
   return (
     <div>
-      <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-3 mb-5 text-amber-300 text-xs">
-        Restaurant filter uses the same account list as the Restaurants tab —
-        won't match real orders correctly until that's pointed at the actual
-        Restaurant model instead of User accounts.
-      </div>
 
       <div className="flex items-center gap-2 mb-5 flex-wrap">
         <button
           onClick={() => setStatusFilter("")}
           className={`px-3 py-1.5 rounded-full text-xs font-bold ${statusFilter === ""
-              ? "bg-amber-500 text-neutral-950"
-              : "bg-zinc-900 text-neutral-400"
+            ? "bg-amber-500 text-neutral-950"
+            : "bg-zinc-900 text-neutral-400"
             }`}
         >
           All Statuses
@@ -349,8 +396,8 @@ const OrdersTab = () => {
             key={s}
             onClick={() => setStatusFilter(s)}
             className={`px-3 py-1.5 rounded-full text-xs font-bold ${statusFilter === s
-                ? "bg-amber-500 text-neutral-950"
-                : "bg-zinc-900 text-neutral-400"
+              ? "bg-amber-500 text-neutral-950"
+              : "bg-zinc-900 text-neutral-400"
               }`}
           >
             {s}
@@ -381,6 +428,7 @@ const OrdersTab = () => {
                 <th className="py-3 pr-4 font-semibold">Order ID</th>
                 <th className="py-3 pr-4 font-semibold">Restaurant</th>
                 <th className="py-3 pr-4 font-semibold">Customer</th>
+                <th className="py-3 pr-4 font-semibold">Items</th>
                 <th className="py-3 pr-4 font-semibold">Status</th>
                 <th className="py-3 pr-4 font-semibold">Total</th>
               </tr>
@@ -388,7 +436,7 @@ const OrdersTab = () => {
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-6 text-neutral-500 text-center">
+                  <td colSpan={6} className="py-6 text-neutral-500 text-center">
                     No orders found.
                   </td>
                 </tr>
@@ -403,6 +451,14 @@ const OrdersTab = () => {
                     </td>
                     <td className="py-3 pr-4 text-neutral-300">
                       {o.userId?.fullName || "—"}
+                    </td>
+                    <td className="py-3 pr-4 text-neutral-400 max-w-[220px]">
+                      {o.items
+                        ?.map(
+                          (it) =>
+                            `${it.foodItemId?.name || "Item"} x${it.quantity}`
+                        )
+                        .join(", ") || "—"}
                     </td>
                     <td className="py-3 pr-4 text-amber-400 font-semibold">
                       {o.orderStatus}
@@ -425,21 +481,30 @@ const FoodsTab = () => {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
-    getPublicFoodItems()
-      .then((data) => setItems(data.FoodItems || []))
-      .catch(() => setError("Failed to load food items."))
+    getAllFoodsAdmin()
+      .then((data) => setItems(data.FoodItems || data.foods || []))
+      .catch(() => setError("Failed to load food items — admin foods route may not exist on the backend yet."))
       .finally(() => setLoading(false));
   }, []);
 
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this food item? This cannot be undone.")) return;
+    setDeletingId(id);
+    try {
+      await deleteFoodItemAdmin(id);
+      setItems((prev) => prev.filter((item) => item._id !== id));
+    } catch (err) {
+      console.log("Delete food item error:", err);
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div>
-      <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 px-5 py-3 mb-5 text-amber-300 text-xs">
-        Reusing the public menu endpoint — only shows items currently marked
-        available. Delete/Disable is shown but disabled: the backend only lets a
-        restaurant delete its own items, with no admin override yet.
-      </div>
 
       {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
@@ -481,11 +546,11 @@ const FoodsTab = () => {
                     </td>
                     <td className="py-3 pr-4">
                       <button
-                        disabled
-                        title="No admin delete/disable route exists on the backend yet"
-                        className="text-xs font-bold text-neutral-600 border border-neutral-800 rounded-lg px-3 py-1.5 cursor-not-allowed"
+                        disabled={deletingId === item._id}
+                        onClick={() => handleDelete(item._id)}
+                        className="text-xs font-bold text-red-400 border border-red-500/30 rounded-lg px-3 py-1.5 hover:bg-red-500/10 disabled:opacity-50"
                       >
-                        Delete / Disable
+                        {deletingId === item._id ? "Deleting..." : "Delete"}
                       </button>
                     </td>
                   </tr>
